@@ -36,11 +36,12 @@ def jobs(req):
     # jobs object
     jobs = Job.objects
 
-    # add computed column : salary_median
-    jobs = jobs.annotate(salary_median=(Case(
-        When(salary_period='hourly', then=(195*F('salary_from')+F('salary_to'))/2),  # nopep8 # 195 working our per month , by law
-        When(salary_period='weekly', then=(4*F('salary_from')+F('salary_to'))/2),  # nopep8
-        When(salary_period='yearly', then=(F('salary_from')+F('salary_to'))/(2*12)),  # nopep8
+    # add computed column : salary_median and monthly_salary_median
+    jobs = jobs.annotate(salary_median=(F('salary_from')+F('salary_to'))/2)  # nopep8
+    jobs = jobs.annotate(monthly_salary_median=(Case(
+        When(salary_period='hourly', then=195*(F('salary_from')+F('salary_to'))/2),  # nopep8 # 195 working our per month , by Singapore's law
+        When(salary_period='weekly', then=4*(F('salary_from')+F('salary_to'))/2),  # nopep8
+        When(salary_period='yearly', then=(1/12)*(F('salary_from')+F('salary_to'))/2),  # nopep8
         When(salary_period='monthly', then=(F('salary_from')+F('salary_to'))/2),  # nopep8
     )))
 
@@ -60,10 +61,10 @@ def jobs(req):
             jobs = jobs.filter(**{key: value})
 
         if key == 'rank_by':
-            if value == "salary_median":
-                order_by_list.append("salary_median")
-            elif value == "-salary_median":
-                order_by_list.append("-salary_median")
+            if value == "monthly_salary_median":
+                order_by_list.append("monthly_salary_median")
+            elif value == "-monthly_salary_median":
+                order_by_list.append("-monthly_salary_median")
 
     # order by descending date
     jobs = jobs.order_by(*order_by_list, "-activation_date")
