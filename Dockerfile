@@ -13,7 +13,6 @@ ENV PYTHONUNBUFFERED 1
 # install dependencies
 RUN pip install --upgrade pip 
 COPY ./requirements.txt /usr/src/app
-RUN apk add --update --no-cache py3-numpy
 RUN pip install -r requirements.txt
 
 # copy project
